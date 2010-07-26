@@ -12,7 +12,7 @@
 
 #ifndef FINSTYPES_H_
 #define FINSTYPES_H_
-// hello world
+
 /* Definition of the modules IDs */
 #define SOCKETSTUBID 55
 #define UDPID	44
