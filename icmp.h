@@ -10,11 +10,11 @@
 
 /*Type value for an ICMP Error message*/
 
-#define ERROR_UNREACHABLE 	3			/* the destination is unreachable */
-#define ERROR_QUENCH 		4			/* source quench (received too many packets) */
-#define ERROR_TIME 			11			/* Time to Live reached 0 before reaching destination */
-#define ERROR_PARAM 		12			/* Ambiguous or missing value in any field in the datagram */
-#define ERROR_REDIRECT 		5			/* When host sends the data to the wrong router. Results in a routing table update for the host */
+#define ERROR_UNREACHABLE			 	3			/* the destination is unreachable */
+#define ERROR_QUENCH 					4			/* source quench (received too many packets) */
+#define ERROR_TIME 						11			/* Time to Live reached 0 before reaching destination */
+#define ERROR_PARAM 					12			/* Ambiguous or missing value in any field in the datagram */
+#define ERROR_REDIRECT 					5			/* When host sends the data to the wrong router. Results in a routing table update for the host */
 
 /* Type value for ICMP Query messages */
 #define QUERY_ECHO_REQUEST				0			/* request for echo */
@@ -56,41 +56,84 @@
 #define REDIR_TOS_NTWRK					2			/*  [obsolete] Forward all future datagrams with the same Type of Service value on the entire network */
 #define REDIR_TOS_HOST					3			/* Redirect all future datagrams with the same Type of Service */
 
-#define UNUSED							0			/* The code field is not used by Source Quench*/
+
+/* Parameter Problem code values */
+#define POINTER_IND						0			/* The pointer is pointing to the location of the error */
+#define MISSING_REQ						1			/* The IP datagram is missing a required option. The point can't point to nothing */
+#define BAD_LEN							2			/* The length of the datagram was incorrect */
+
+/* Router Advertise and solicitation codes*/
+#define NORMAL							0			/* normally the field is set to 0 with some exceptions */
+#define MOBILE_AGENT					16			/* When a Mobile IP agent is sending the Router Advertisement it may set the value 16 if the receiving device is also a mobile agent that doesn't intend to handle normal trafic. */
+
+#define UNUSED							0			/* The code field is not used by Source Quench, Echo, Timestamp, Router solicitation */
+
+#define MAX_ICMP_LEN				548			/* 576 bytes total max - 4 bytes for ICMP header -4 for unused - 20 IP header*/
+
+
 
 struct ip4_header{
 
-	uint8_t ip_verlen;				 	/* IP version & header length (in longs)*/
-	uint8_t ip_dif; 					/* differentiated service			*/
-	uint16_t ip_len; 					/* total packet length (in octets)	*/
-	uint16_t ip_id; 					/* datagram id				*/
-	uint16_t ip_fragoff; 				/* fragment offset (in 8-octet's)	*/
-	uint8_t ip_ttl; 					/* time to live, in gateway hops	*/
-	uint8_t ip_proto; 					/* IP protocol */
-	uint16_t ip_cksum; 					/* header checksum 			*/
-	uint32_t ip_src; 					/* IP address of source			*/
-	uint32_t ip_dst; 					/* IP address of destination		*/
+	uint8_t ip_verlen;						 		/* IP version & header length (in longs)*/
+	uint8_t ip_dif; 								/* differentiated service			*/
+	uint16_t ip_len; 								/* total packet length (in octets)	*/
+	uint16_t ip_id; 								/* datagram id				*/
+	uint16_t ip_fragoff; 							/* fragment offset (in 8-octet's)	*/
+	uint8_t ip_ttl; 								/* time to live, in gateway hops	*/
+	uint8_t ip_proto; 								/* IP protocol */
+	uint16_t ip_cksum; 								/* header checksum 			*/
+	uint32_t ip_src;		 						/* IP address of source			*/
+	uint32_t ip_dst; 								/* IP address of destination		*/
 };
 
 
 /* used by Destination Unreachable, Source Quench, Time Exceeded*/
 struct error_message{
-	uint32_t unused;					/* 4 bytes of unused data */
-	struct ip4_header;					/* original IP header of the original IP datagram */
-	unsigned char data[8];				/* Essentially the UDP and TCP headers. Or at least the important parts*/
+	uint32_t unused;								/* 4 bytes of unused data */
+	struct ip4_header;								/* original IP header of the original IP datagram */
+	unsigned char data[MAX_ICMP_LEN];				/* RFC 1812 says that an ICMP error message should contain as much of the original data as possible without exceeding a total length of 576 bytes*/
 
 };
 /* used by parameter problems */
 struct error_param{
-		uint8_t pointer;					/* pointer to the byte that caused the Parameter Problem message to be generated */
-		uint24_t unused;					/* 3 bytes of unused data*/
-		struct ip4_header;					/* original IP header of the original IP datagram */
-		unsigned char data[8];
+	uint8_t pointer;								/* pointer to the byte that caused the Parameter Problem message to be generated */
+	uint24_t unused;								/* 3 bytes of unused data*/
+	struct ip4_header;								/* original IP header of the original IP datagram */
+	unsigned char data[MAX_ICMP_LEN];
+};
+struct error_redir{
+	uint32_t preferedRouter;						/* The IP address of the preferred router for future transmissions. */
+	struct ip4_header;								/* original IP header of the original IP datagram */
+	unsigned char data[MAX_ICMP_LEN];
 };
 
 
-struct query_message{
+struct info_echo{
+	uint16_t identifier;							/* Helps sort multiple Echo requests. Originally intended for a "higher level label" like a session identifier. However it used differently by different implementations. Sometimes filled with process number */
+	uint16_t sequence;								/* Originally for identifying messages in a series.  Once again up to implementation for how to use */
+	unsigned char data[MAX_ICMP_LEN]				/* Optional data, unspecified*/
+};
 
+struct info_timestamp{
+	uint16_t identifier;							/* Helps sort multiple Echo requests. Originally intended for a "higher level label" like a session identifier. However it used differently by different implementations. Sometimes filled with process number */
+	uint16_t sequence;								/* Originally for identifying messages in a series.  Once again up to implementation for how to use */
+	uint32_t originate;								/* Time the original was sent time in MS after midnight*/
+	uint32_t receive;								/* Time the original was received*/
+	uint32_t transmit;								/* Time the reply was sent*/
+
+};
+
+
+struct info_router_adv{
+	uint8_t	numAddrs;								/* the number of address's associated with the router that are in the data */
+	uint8_t	addrSize;								/* number of 32 bit words associated with each address. It should be fixed at two [Router Address and Preference Level] */
+	uint16_t lifetime;								/* The number of seconds the host should consider the information as valid. */
+	uint32_t data[MAX_ICMP_LEN/4]					/* 32 bit address then 32 bit preference level. This repeats the amount of times in the Number of Address field */
+};  /* The preference field is used for multiple addresses. The higher the number the more routers prefers to receive datagrams on. */
+
+
+struct info_router_sol{
+	uint32_t reserved;								/* 4 bytes that should all be set to 0 */
 };
 
 struct icmp_packet{
@@ -99,8 +142,12 @@ struct icmp_packet{
 	uint16_t checksum;
 	union{
 		struct error_message;
-		struct query_message;
+		struct error_redir;
 		struct error_param;
+		struct info_echo;
+		struct info_timestamp;
+		struct info_router_adv;
+		struct info_router_sol;
 	};
 
 };
