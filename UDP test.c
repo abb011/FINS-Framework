@@ -108,9 +108,9 @@ int main() {
 	struct finsFrame ff;
 	unsigned short checksum = 0;
 
-	char str[20] = "00000000TESTING";
+	unsigned char str[20] = "00000000TESTING";
 
-	ff.dataFrame.pdu = &str[0];
+	ff.dataFrame.pdu = str;
 
 
 	meta.u_IPdst = IP4_ADR_P2N(171,2,14,10);

@@ -46,7 +46,7 @@ void udp_out(struct finsFrame* ff) {
 	/* constructs the UDP packet from the FDF and the meta data */
 
 	unsigned char* ptrToPDU = ff->dataFrame.pdu;												/* assigns a pointer to the PDU location*/
-	ptrToPDU -= U_HEADER_LEN;																	/* moves the pointer 8 bytes to account for those empty 8 bytes*/
+	ptrToPDU += U_HEADER_LEN;																	/* moves the pointer 8 bytes to account for those empty 8 bytes*/
 
 	memcpy(&packet.u_data,ptrToPDU, ff->dataFrame.pduLength); 									/* Copies the actual data into the data section of the UDP packet. The +U_HEADER_LEN is because of leaving 8 bytes free in the input Queue */
 	packet.u_dst = meta->u_destPort;															/* gets the destination port from the metadata */
