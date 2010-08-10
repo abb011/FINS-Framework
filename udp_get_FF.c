@@ -13,11 +13,7 @@
  * the Fins Frame's destination within the UDP module.
  *
  */
-#include <stdio.h>
-#include <stdlib.h>
-#include <stdint.h>
-#include <string.h>
-#include "finstype.h"
+
 #include "udp.h"
 
 

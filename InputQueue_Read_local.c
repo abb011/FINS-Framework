@@ -7,11 +7,7 @@
  *
  */
 
-#include <stdio.h>
-#include <stdlib.h>
-#include <stdint.h>
-#include <string.h>
-#include "finstype.h"
+
 #include "udp.h"
 
 int UDP_InputQueue_Read_local(struct finsFrame *pff_local) {

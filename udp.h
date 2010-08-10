@@ -8,6 +8,14 @@
 #ifndef UDP_H_
 #define UDP_H_
 
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+#include <arpa/inet.h>
+#include <inttypes.h>
+#include <netinet/in.h>
+#include "finstype.h"
+
 #define IP_MAXLEN 65535
 #define IP_MINLEN 5
 #define U_HEADER_LEN 8 										/* UDP header length in bytes, 64 bits. */

@@ -5,12 +5,7 @@
  *      Author: alex
  */
 
-#include <stdio.h>
-#include <stdlib.h>
-#include <stdint.h>
-#include <arpa/inet.h>
-#include <string.h>
-#include "finstype.h"
+
 #include "udp.h"
 
 struct udp_statistics udpStat;
@@ -106,7 +101,7 @@ int main() {
 	struct udp_metadata_parsed meta;
 	struct finsFrame* pff;
 	struct finsFrame ff;
-	unsigned short checksum = 0;
+
 
 	unsigned char str[20] = "00000000TESTING";
 

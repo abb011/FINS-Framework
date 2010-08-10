@@ -4,11 +4,7 @@
  *  Created on: Jul 5, 2010
  *      Author: alex
  */
-#include <stdio.h>
-#include <stdlib.h>
-#include <stdint.h>
-#include <string.h>
-#include "finstype.h"
+
 #include "udp.h"
 
 /**@brief generates and returns a new Fins Frame using the paramters provided
