@@ -8,6 +8,13 @@
 #ifndef ICMP_H_
 #define ICMP_H_
 
+
+#include <stdio.h>
+#include <stdlib.h>
+#include <stdint.h>
+#include <string.h>
+#include "finstype.h"
+
 /*Type value for an ICMP Error message*/
 
 #define ERROR_UNREACHABLE			 	3			/* the destination is unreachable */
@@ -47,7 +54,7 @@
 
 /* Time exceeded code Values */
 #define EXPIRATION  					0			/* The time to live of field has expired*/
-#define REASSEMBLY						1			/* The fragment reassembly time has been exceeded */
+#define REASSEMBLY						1			/* The fragment reassemby time has been exceeded */
 
 
 /* Redirect Code values code 0 and 2 were prohibited by RFC 1812.*/
@@ -97,7 +104,8 @@ struct error_message{
 /* used by parameter problems */
 struct error_param{
 	uint8_t pointer;								/* pointer to the byte that caused the Parameter Problem message to be generated */
-	uint24_t unused;								/* 3 bytes of unused data*/
+	uint16_t unused;
+	uint8_t unusedAgain;							/* 3 bytes of unused data*/
 	struct ip4_header;								/* original IP header of the original IP datagram */
 	unsigned char data[MAX_ICMP_LEN];
 };
@@ -129,8 +137,13 @@ struct info_router_adv{
 	uint8_t	addrSize;								/* number of 32 bit words associated with each address. It should be fixed at two [Router Address and Preference Level] */
 	uint16_t lifetime;								/* The number of seconds the host should consider the information as valid. */
 	uint32_t data[MAX_ICMP_LEN/4]					/* 32 bit address then 32 bit preference level. This repeats the amount of times in the Number of Address field */
-};  /* The preference field is used for multiple addresses. The higher the number the more routers prefers to receive datagrams on. */
+};				 									/* The preference field is used for multiple addresses. The higher the number the more routers prefers to receive datagrams on. */
 
+struct info_address_mask{
+	uint16_t identifier;							/* Helps sort multiple  requests. Originally intended for a "higher level label" like a session identifier. However it used differently by different implementations. Sometimes filled with process number */
+	uint16_t sequence;								/* Originally for identifying messages in a series.  Once again up to implementation for how to use */
+	uint32_t addressMask							/* the subnet mask for the local network.  It is filled in by the router that replies. */
+};
 
 struct info_router_sol{
 	uint32_t reserved;								/* 4 bytes that should all be set to 0 */
@@ -141,13 +154,14 @@ struct icmp_packet{
 	uint8_t code;
 	uint16_t checksum;
 	union{
-		struct error_message;
-		struct error_redir;
-		struct error_param;
-		struct info_echo;
-		struct info_timestamp;
-		struct info_router_adv;
-		struct info_router_sol;
+		struct error_message		error;
+		struct error_redir  		redirect;
+		struct error_param			parameterProblem;
+		struct info_echo			echo;
+		struct info_timestamp		timestamp;
+		struct info_router_adv		routerAdvertisement;
+		struct info_router_sol		routerSolicite;
+		struct info_address_mask	addressMask;
 	};
 
 };
