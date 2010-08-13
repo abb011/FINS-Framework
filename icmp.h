@@ -167,4 +167,12 @@ struct icmp_packet{
 };
 
 
+void icmp_receive(struct finsFrame* ff);
+void icmp_switch(struct finsFrame* ff);
+void echo_request(icmp_packet packet);
+void echo_reply(icmp_packet packet);
+void make_echo_request();
+unsigned short icmp_checksum(struct icmp_packet, int length, int minLength);
+
+
 #endif
